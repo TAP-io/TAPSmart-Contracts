@@ -31,7 +31,7 @@ contract ContactList{
         require(checkTapUser[_number] == false, "Phone number alredy registered to an account");
 
         checkTapUser[_number] = true;
-        completeList[msg.sender] = List(_list, _number);
+        completeList[msg.sender] = List( _number, _list);
         onBoard[msg.sender] = true;
 
         emit ListCreated(msg.sender, _number);
@@ -46,7 +46,12 @@ contract ContactList{
     function getList() public view returns(string memory) {
         require(onBoard[msg.sender], "You are not registered");
         
-        return completeList[msg.sender].h;
+        return (completeList[msg.sender].h);
+    }
+
+    function getNumber() public view returns(string memory) {
+        require(onBoard[msg.sender], "You are not registered");
         
+        return (completeList[msg.sender].number);
     }
 }
