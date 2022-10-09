@@ -4,18 +4,6 @@ const { ethers } = require("hardhat")
 
 describe("ContactList", function () {
   
-  /*const auth =
-    'Basic ' + Buffer.from("2Fr7mLPnqoL3vB7WTEsFopXTvX9" + ':' + "945f308ebc0cc638a461ced4f7926a75").toString('base64');
-  const client = ipfs({
-    host: 'ipfs.infura.io',
-    port: 5001,
-    protocol: 'https',
-    headers: {
-        authorization: auth,
-    },
-  });*/
-
- 
   
 
   it("Should create list", async function () {
@@ -23,39 +11,54 @@ describe("ContactList", function () {
     const contactList = await ContactList.deploy()
     await contactList.deployed()
 
-    
-    await contactList.createList("afasfsa", "6462269334")
-
-    const list = await contactList.getList()
-    
-    expect(list).to.equal("afasfsa")
+    const [owner] = await ethers.getSigners();
+     
+    await expect(contactList.createList("6462269334")).to.emit(contactList, "ListCreated").withArgs(owner.address, "6462269334")
   
     
   })
 
-  it("Should Update list", async function() {
+  it("Should Add Contact", async function() {
     const ContactList = await ethers.getContractFactory("ContactList")
     const contactList = await ContactList.deploy()
     await contactList.deployed()
 
-    await contactList.createList("afasfsa", "6462269334")
-    
-    await contactList.updateList("Hello")
+    const [owner, otherAccount] = await ethers.getSigners();
 
-    const list = await contactList.getList()
-
-    expect(list).to.equal("Hello")
+    await contactList.createList("6462269334")
     
+
+    await expect(contactList.addContact("IPFS-HASH", otherAccount.address, "49855334" )).to.emit(contactList, "NewContact").withArgs(owner.address, otherAccount.address)
+  
+    const account = await contactList.getAllContacts()
+
+    expect(account[0]).to.equal(otherAccount.address)
   })
 
-  it("Should get number", async function () {
+  it("Should get Contact Info", async function () {
     const ContactList = await ethers.getContractFactory("ContactList")
     const contactList = await ContactList.deploy()
     await contactList.deployed()
 
-    await contactList.createList("afasfsa", "6462269334")
+    const [owner, otherAccount] = await ethers.getSigners();
 
-    const number = await contactList.getNumber()
+    await contactList.createList("6462269334")
+
+    await expect(contactList.addContact("IPFS-HASH", otherAccount.address, "49855334" )).to.emit(contactList, "NewContact").withArgs(owner.address, otherAccount.address)
+
+    const info = await contactList.getContactInfo("49855334")
+
+    expect(info).to.equal("IPFS-HASH")
+  })
+
+  it("Should get Number", async function () {
+    const ContactList = await ethers.getContractFactory("ContactList")
+    const contactList = await ContactList.deploy()
+    await contactList.deployed()
+
+    await contactList.createList("6462269334")
+
+    const number = await contactList.getUserNumber()
 
     expect(number).to.equal("6462269334")
   })
